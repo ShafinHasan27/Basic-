@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Result Board</title>
+</head>
+<body>
+  <h2>Result Board</h2>
+<ul id="list"></ul>
+  <p id="summary"></p>
+  <input id="nameInput" placeholder="Name">
+<input id="marksInput" placeholder="Marks" type="number">
+<button id="addBtn">Add</button>
+  <button id="sort">Sort</button>
+  <button id="reset">Reset</button>
+  <script>
+    const get=(id)=>document.getElementById(id);
+    
+    class student{
+  constructor(name,marks){
+    this.name=name;
+    this.marks=marks;
+    }
+  show() {
+  console.log(this.name + ": " + this.marks);
+  }
+  isPass(){
+    if(this.marks>=40){
+      return true
+      }else{
+      return false
+      }
+    }
+  }
+let s1=new student("nirob",60)
+let s2=new student("salma",90)
+let s3 = new student("karim", 35)
+//let students=[s1,s2,s3]
+    const saved=localStorage.getItem("students");
+    const students=saved?(JSON.parse(saved)).map(s=>new student(s.name,s.marks)):[s1,s2,s3];
+    const saveTask=()=>localStorage.setItem("students",JSON.stringify(students));
+   function render(){
+     
+    let html="";
+    for(let i=0;i<students.length;i++){
+      let status="";
+      if(students[i].isPass()){
+       status="passed"
+      }else{
+      status="failed"
+      }
+      html+=`<li>${students[i].name}: ${students[i].marks} (${status})  <button onclick="removeStudent(${i})">X</button></li>`
+      }
+    get("list").innerHTML=html
+     if(students.length===0){
+       get("summary").textContent="No student";
+       return;
+       }
+     const passed=students.filter(p=>p.marks>=40);
+     const sum=students.reduce((total,a)=>total+a.marks,0)
+     get("summary").textContent=`Total student:${students.length},Passed students:${passed.length}, Average:${(sum/students.length).toFixed(1)}`
+     }
+    render();
+    get("addBtn").onclick = function () {
+  let name = get("nameInput").value;
+  let marks = Number(get("marksInput").value);
+      if (name === "" || get("marksInput").value === "") {
+  return;   // কিছু না করে function থামাও
+      }
+      if (marks < 0 || marks > 100) {
+  return;
+      }
+students.push(new student(name,marks));
+      saveTask();
+              render();
+      get("nameInput").value = "";
+get("marksInput").value = "";
+  // ১. new student(name, marks) বানাও
+  // ২. students array-তে push করো
+  // ৩. render() call করো
+};
+    const removeStudent=(index)=>{
+      students.splice(index,1);
+      render();
+      saveTask();
+      }
+    get("sort").onclick=()=>{
+      students.sort((a,b)=>b.marks-a.marks);
+      render()
+      saveTask()
+      
+    }
+    get("reset").onclick=()=>{
+      localStorage.removeItem("students");
+      location.reload()
+      }
+  </script>
+</body>
+</html>
